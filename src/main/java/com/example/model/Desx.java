@@ -119,8 +119,6 @@ public class Desx {
             blocks[blockCounter] = new DataBlock(tmp);
         }
 
-
-
     }
 
     private int calculatePosition(byte[] tab) {
@@ -149,10 +147,10 @@ public class Desx {
             byte sBoxResult;
 
             for (int i = 0; i < 16; i++) {
-                tmp = right;
-                byte[] tmp_key = key2.roundEncrypt(i);
-                right = TabUtils.permutate(expansionPermutationPattern, right, 48);
-                right = TabUtils.xor(right, tmp_key);
+                tmp = right;                                                                //zapamietanie RPT, by potem przypisać do LPT
+                byte[] subKey = key2.roundEncrypt(i);                                       //generowanie 48 bitowego podklucza poprzez przesuwanie bitów i permutacje
+                right = TabUtils.permutate(expansionPermutationPattern, right, 48);   //permutacja rozszerzająca RPT z 32 do 48 bitów
+                right = TabUtils.xor(right, subKey);                                        //xorowanie RPT z podkluczem
                 for (int j = 0; j < 8; j++) {
                     System.arraycopy(right, j*6, sixBits, 0, 6);
                     sBoxResult = sBox[(j * 64) + calculatePosition(sixBits)];
@@ -171,13 +169,8 @@ public class Desx {
             cipherArr[counter++] = new DataBlock(cipherText);
         }
 
-
-
     }
 
-    public DataBlock[] getCipherArray() {
-        return cipherArr;
-    }
 
     public String getCipherText() {
         StringBuilder cipherText = new StringBuilder();

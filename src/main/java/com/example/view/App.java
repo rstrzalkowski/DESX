@@ -20,7 +20,5 @@ public class App extends Application {
 
     public static void main(String[] args) {
         launch();
-        byte tab = 8;
-        System.out.println(tab);
     }
 }
