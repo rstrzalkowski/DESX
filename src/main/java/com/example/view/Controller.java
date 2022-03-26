@@ -5,7 +5,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import com.example.model.DES;
+import com.example.model.Desx;
 
 public class Controller {
     @FXML
@@ -56,13 +56,10 @@ public class Controller {
 
 
     public static void addTextLimiter(final TextField tf, final int maxLength) {
-        tf.textProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(final ObservableValue<? extends String> ov, final String oldValue, final String newValue) {
-                if (tf.getText().length() > maxLength) {
-                    String s = tf.getText().substring(0, maxLength);
-                    tf.setText(s);
-                }
+        tf.textProperty().addListener((ov, oldValue, newValue) -> {
+            if (tf.getText().length() > maxLength) {
+                String s = tf.getText().substring(0, maxLength);
+                tf.setText(s);
             }
         });
     }
@@ -72,6 +69,16 @@ public class Controller {
         key1.setText("0123456789ABCDEF");
         key2.setText("1133557799BBDDFF");
         key3.setText("0022446688AACCEE");
+    }
+
+    @FXML
+    public void onEncryptButtonClick(ActionEvent actionEvent) {
+        String pt = plaintext.getText();
+        Desx desx = new Desx(key1.getText(), key2.getText(), key3.getText());
+        desx.encode(pt);
+
+        ciphertext.setText(desx.getCipherText());
+
     }
 
 }

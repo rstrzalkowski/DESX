@@ -15,14 +15,13 @@ public class TabUtils {
 
 
     public static byte[] bytesToBits(byte[] block) {
-        byte[] bitBlock = new byte[64];
+        byte[] bitBlock = new byte[block.length * 8];
         String string = "";
         int counter = 0;
-        for (int i = 0; i < 64; i++) {
+        for (int i = 0; i < block.length * 8; i++) {
             if ((i%8) == 0) {
                 String tmp = Integer.toBinaryString(block[counter++]);
                 string = "00000000".substring(tmp.length()) + tmp;
-                System.out.println(string);
             }
             if(string.charAt(i % 8) == '0') {
                 bitBlock[i] = 0;
@@ -34,30 +33,74 @@ public class TabUtils {
         return bitBlock;
     }
 
-    public static int[] charsToInts(char[] block) {
-        int[] blockInt = new int[8];
+    public static byte[] byteToBits(byte number) {
+        byte[] bitBlock = new byte[8];
+        String string = "";
         for (int i = 0; i < 8; i++) {
-            blockInt[i] = block[i];
-        }
+            if (i == 0) {
+                String tmp = Integer.toBinaryString(number);
+                string = "00000000".substring(tmp.length()) + tmp;
+            }
+            if(string.charAt(i) == '0') {
+                bitBlock[i] = 0;
+            } else {
+                bitBlock[i] = 1;
+            }
 
-        return blockInt;
+        }
+        return bitBlock;
     }
 
+    public static byte[] hexToBits(String input) {
+        int n = input.length() * 4;
+        StringBuilder inputBuilder = new StringBuilder(Long.toBinaryString(
+                Long.parseUnsignedLong(input, 16)));
+        while (inputBuilder.length() < n)
+            inputBuilder.insert(0, "0");
+        input = inputBuilder.toString();
+        return binStringToBits(input);
+    }
 
-    public static char[] stringToChars(String text) {
-        char[] result = new char[text.length()];
-        for (int i = 0; i < text.length(); i++) {
-            result[i] = text.charAt(i);
+    public static String bitsToHex(byte[] bits) {
+        StringBuilder hex = new StringBuilder();
+        byte[] tmp = new byte[4];
+        for (int i = 0; i < bits.length / 4; i++) {
+            System.arraycopy(bits, i * 4, tmp, 0, 4);
+            hex.append(Integer.toHexString(bitsToInt(tmp)));
         }
+        return hex.toString();
 
+    }
+
+    public static byte[] binStringToBits(String bin) {
+        byte[] block = new byte[bin.length()];
+        for (int i = 0;i < bin.length(); i++) {
+            if (bin.charAt(i) == '0') {
+                block[i] = 0;
+            } else {
+                block[i] = 1;
+            }
+
+        }
+        return block;
+
+    }
+
+    public static int bitsToInt(byte[] tab) {
+        int result = 0;
+        int temp = 1;
+
+        for (int i = tab.length - 1; i >= 0; i--) {
+            result += tab[i] * temp;
+            temp *= 2;
+        }
         return result;
     }
 
+
     public static byte[] stringToBytes(String text) {
-        byte[] result = new byte[0];
-        for (int i = 0; i < text.length(); i++) {
-            result = text.getBytes();
-        }
+        byte[] result;
+        result = text.getBytes();
 
         return result;
     }

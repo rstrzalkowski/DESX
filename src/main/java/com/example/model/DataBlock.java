@@ -18,10 +18,22 @@ public class DataBlock {
             63, 55, 47, 39, 31, 23, 15, 7
     };
 
+
     public DataBlock(byte[] block) {
-        bitBlock = block;
+        bitBlock = block.clone();
         permutatedBitBlock = TabUtils.permutate(initialPermutationPattern, bitBlock, 64);
     }
+
+    public DataBlock(byte[] block, boolean isBitArr) {
+        if(isBitArr) {
+            bitBlock = block.clone();
+            permutatedBitBlock = TabUtils.permutate(initialPermutationPattern, bitBlock, 64);
+        } else {
+            bitBlock = TabUtils.bytesToBits(block);
+            permutatedBitBlock = TabUtils.permutate(initialPermutationPattern, bitBlock, 64);
+        }
+    }
+
 
     public byte[] getLPT() {
         byte[] LPT = new byte[32];
@@ -35,8 +47,15 @@ public class DataBlock {
         return RPT;
     }
 
-    public byte[] getWholeBlock() {
+    public byte[] getPrimaryBitBlock() {
         return bitBlock;
     }
 
+    @Override
+    public String toString() {
+        return new org.apache.commons.lang3.builder.ToStringBuilder(this)
+                .append("bitBlock", bitBlock)
+                .append("permutatedBitBlock", permutatedBitBlock)
+                .toString();
+    }
 }
