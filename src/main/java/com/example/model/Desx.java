@@ -105,12 +105,6 @@ public class Desx {
                 tmp[j] = TabUtils.charsToBits(allBytes)[counter++];
 
             }
-            if(isEncrypted) {
-                tmp = TabUtils.xor(tmp, key3.getBitBlock());  //xorowanie szyfrogramu z trzecim kluczem
-            } else {
-                tmp = TabUtils.xor(tmp, key1.getBitBlock());  //xorowanie początkowego bloku danych z pierwszym kluczem
-            }
-
             blocks[blockCounter++] = new DataBlock(tmp);
         }
         if (allBytes.length % 8 != 0) {
@@ -118,28 +112,15 @@ public class Desx {
             for (int k = 0; k < (allBytes.length % 8) * 8; k++) {
                 tmp[k] = TabUtils.charsToBits(allBytes)[counter++];
             }
-            if(isEncrypted) {
-                tmp = TabUtils.xor(tmp, key3.getBitBlock());  //xorowanie szyfrogramu z trzecim kluczem
-            } else {
-                tmp = TabUtils.xor(tmp, key1.getBitBlock());  //xorowanie początkowego bloku danych z pierwszym kluczem
-            }
 
             blocks[blockCounter] = new DataBlock(tmp);
         }
 
     }
 
-    private int calculatePosition(byte[] tab) {
-        byte[] row = { tab[0], tab[5] };
-        byte[] column = { tab[1], tab[2], tab[3], tab[4] };
-
-        return TabUtils.bitsToInt(row) * 16 + TabUtils.bitsToInt(column);
-    }
-
     public void encrypt(String text) {
 
         char[] allBytes = TabUtils.stringToChars(text);
-
 
         divideData(allBytes, false);
 
@@ -149,6 +130,8 @@ public class Desx {
 
 
         for (DataBlock block : blocks) {
+
+            block.xorBlock(key1.getBitBlock());
 
             LPT = block.getLPT();
             RPT = block.getRPT();
@@ -181,6 +164,9 @@ public class Desx {
         byte[] RPT;
 
         for (DataBlock block : blocks) {
+
+            block.xorBlock(key3.getBitBlock());
+
             LPT = block.getLPT();
             RPT = block.getRPT();
             Key key = new Key(key2.getStrKey()); //stan klucza się zmienia po każdym key.roundEncrypt() wiec tworzymy tymczasowy klucz
@@ -209,13 +195,20 @@ public class Desx {
         RPT = TabUtils.xor(RPT, subKey);                                        //xorowanie RPT z podkluczem
         for (int j = 0; j < 8; j++) {
             System.arraycopy(RPT, j*6, sixBits, 0, 6);
-            sBoxResult = sBox[(j * 64) + calculatePosition(sixBits)]; //Sboxy
+            sBoxResult = sBox[(j * 64) + calculatePositionInSBox(sixBits)]; //Sboxy
             System.arraycopy(TabUtils.byteToBits(sBoxResult), 4, afterSBox, j * 4, 4); //od 4 bo bajta przedstawiamy jako 8 bitów a potrzebujemy 4 najmniejszych
         }
         afterSBox = TabUtils.permutate(patternPermutation, afterSBox, 32);
 
         RPT = TabUtils.xor(LPT, afterSBox);
         return RPT;
+    }
+
+    private int calculatePositionInSBox(byte[] tab) {
+        byte[] row = { tab[0], tab[5] };
+        byte[] column = { tab[1], tab[2], tab[3], tab[4] };
+
+        return TabUtils.bitsToInt(row) * 16 + TabUtils.bitsToInt(column);
     }
 
     public String getCipherText() {

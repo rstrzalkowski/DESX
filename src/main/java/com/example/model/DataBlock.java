@@ -36,6 +36,11 @@ public class DataBlock {
         return RPT;
     }
 
+    public void xorBlock(byte[] arr) {
+        bitBlock = TabUtils.xor(bitBlock, arr);
+        permutatedBitBlock = TabUtils.permutate(initialPermutationPattern, bitBlock, 64);
+    }
+
     public byte[] getPrimaryBitBlock() {
         return bitBlock;
     }
