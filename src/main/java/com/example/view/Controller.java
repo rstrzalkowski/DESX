@@ -89,7 +89,7 @@ public class Controller {
     private void encrypt() {
         String pt = plaintext.getText();
         Desx desx = new Desx(key1.getText(), key2.getText(), key3.getText());
-        desx.encrypt(pt, false);
+        desx.encrypt(pt);
 
         ciphertext.setText(desx.getCipherText());
     }
@@ -98,9 +98,9 @@ public class Controller {
         String ctHex = ciphertext.getText();
         String ctStr = TabUtils.hexToAscii(ctHex);
         Desx desx = new Desx(key1.getText(), key2.getText(), key3.getText());
-        desx.encrypt(ctStr, true);
+        desx.decrypt(ctStr);
 
-        plaintext.setText(desx.getCipherText());
+        plaintext.setText(desx.getPlainText());
     }
 
     @FXML

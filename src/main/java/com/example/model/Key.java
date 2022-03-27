@@ -1,29 +1,30 @@
 package com.example.model;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
 
 public class Key {
 
-    private byte[] bitBlock;
-    private byte[] leftBlock;
-    private byte[] rightBlock;
-    private byte[] connectedBlock = new byte[56];
-    private byte[] permutatedKey = new byte[48];
+    private final String strKey;
+    private final byte[] bitBlock;
+    private final byte[] leftBlock;
+    private final byte[] rightBlock;
+    private final byte[] connectedBlock = new byte[56];
 
-    private byte[] leftPattern = {
+    private final byte[] leftPattern = {
             57, 49, 41, 33, 25, 17,  9,
             1, 58, 50, 42, 34, 26, 18,
             10,  2, 59, 51, 43, 35, 27,
             19, 11,  3, 60, 52, 44, 36
     };
-    private byte[] rightPattern = {
+    private final byte[] rightPattern = {
             63, 55, 47, 39, 31, 23, 15,
             7, 62, 54, 46, 38, 30, 22,
             14,  6, 61, 53, 45, 37, 29,
             21, 13,  5, 28, 20, 12,  4
     };
 
-    private byte[] pattern56to48 = {
+    private final byte[] pattern56to48 = {
             14, 17, 11, 24,  1,  5,  3,
             28, 15,  6, 21, 10, 23, 19,
             12,  4, 26,  8, 16,  7, 27,
@@ -33,13 +34,18 @@ public class Key {
             46, 42, 50, 36, 29, 32};
 
 
-    private byte[] shifts = {
+    private final byte[] shifts = {
             1, 1, 2, 2, 2, 2, 2, 2,
             1, 2, 2, 2, 2, 2, 2, 1, 0
     };
 
+    public String getStrKey() {
+        return strKey;
+    }
+
     public Key(String hexaKey) {
         bitBlock = TabUtils.hexToBits(hexaKey);
+        strKey = hexaKey;
         leftBlock = TabUtils.permutate(leftPattern, bitBlock, 28);
         rightBlock = TabUtils.permutate(rightPattern, bitBlock, 28);
     }
@@ -73,7 +79,7 @@ public class Key {
             leftShift(shifts[n]);
         }
         connectBlock();
-        permutatedKey = TabUtils.permutate(pattern56to48, connectedBlock, 48);
+        byte[] permutatedKey = TabUtils.permutate(pattern56to48, connectedBlock, 48);
         return permutatedKey;
     }
 

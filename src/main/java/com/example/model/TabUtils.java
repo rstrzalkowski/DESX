@@ -1,9 +1,5 @@
 package com.example.model;
 
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-
 public class TabUtils {
 
     public static byte[] permutate(byte[] pattern, byte[] block, int length) {
@@ -15,7 +11,35 @@ public class TabUtils {
     }
 
 
+    public static char[] stringToChars(String text) {
+        char[] result = new char[text.length()];
+        for (int i = 0; i < text.length(); i++) {
+            result[i] = text.charAt(i);
+        }
+
+        return result;
+    }
+
     public static byte[] bytesToBits(byte[] block) {
+        byte[] bitBlock = new byte[block.length * 8];
+        String string = "";
+        int counter = 0;
+        for (int i = 0; i < block.length * 8; i++) {
+            if ((i%8) == 0) {
+                String tmp = Integer.toBinaryString(block[counter++]);
+                string = "00000000".substring(tmp.length()) + tmp;
+            }
+            if(string.charAt(i % 8) == '0') {
+                bitBlock[i] = 0;
+            } else {
+                bitBlock[i] = 1;
+            }
+
+        }
+        return bitBlock;
+    }
+
+    public static byte[] charsToBits(char[] block) {
         byte[] bitBlock = new byte[block.length * 8];
         String string = "";
         int counter = 0;
@@ -84,6 +108,17 @@ public class TabUtils {
 
     }
 
+    public static String bitsToString(byte[] bits) {
+        StringBuilder str = new StringBuilder();
+        byte[] tmp = new byte[8];
+        for (int i = 0; i < bits.length / 8; i++) {
+            System.arraycopy(bits, i * 8, tmp, 0, 8);
+            str.append(Character.toString(TabUtils.bitsToInt(tmp)));
+        }
+        return str.toString();
+
+    }
+
     public static byte[] binStringToBits(String bin) {
         byte[] block = new byte[bin.length()];
         for (int i = 0;i < bin.length(); i++) {
@@ -106,14 +141,6 @@ public class TabUtils {
             result += tab[i] * temp;
             temp *= 2;
         }
-        return result;
-    }
-
-
-    public static byte[] stringToBytes(String text) {
-        byte[] result;
-        result = text.getBytes();
-
         return result;
     }
 
