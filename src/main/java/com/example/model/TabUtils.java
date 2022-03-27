@@ -77,7 +77,11 @@ public class TabUtils {
     }
 
     public static String hexToAscii(String hexStr) {
-        StringBuilder output = new StringBuilder("");
+        StringBuilder output = new StringBuilder();
+
+        if(hexStr.length() % 2 == 1) {
+            hexStr += "0";
+        }
 
         for (int i = 0; i < hexStr.length(); i += 2) {
             String str = hexStr.substring(i, i + 2);

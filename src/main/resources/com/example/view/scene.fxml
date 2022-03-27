@@ -56,12 +56,12 @@
          <Font name="Arial Bold" size="12.0" />
       </font>
    </Button>
-   <Button fx:id="loadKeysButton" layoutX="379.0" layoutY="89.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="119.0" text="Wczytaj klucze">
+   <Button fx:id="loadKeysButton" layoutX="379.0" layoutY="89.0" mnemonicParsing="false" onAction="#onLoadKeysButtonClicked" prefHeight="25.0" prefWidth="119.0" text="Wczytaj klucze">
       <font>
          <Font name="Arial Bold" size="12.0" />
       </font>
    </Button>
-   <Button fx:id="saveKeysButton" layoutX="507.0" layoutY="89.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="119.0" text="Zapisz klucze">
+   <Button fx:id="saveKeysButton" layoutX="507.0" layoutY="89.0" mnemonicParsing="false" onAction="#onSaveKeysButtonClicked" prefHeight="25.0" prefWidth="119.0" text="Zapisz klucze">
       <font>
          <Font name="Arial Bold" size="12.0" />
       </font>
@@ -121,7 +121,7 @@
          <Font size="14.0" />
       </font>
    </Text>
-   <Button fx:id="savePlaintextButton" layoutX="210.0" layoutY="438.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="59.0" text="Zapisz">
+   <Button fx:id="savePlaintextButton" layoutX="210.0" layoutY="438.0" mnemonicParsing="false" onAction="#onSavePlainTextButtonClicked" prefHeight="25.0" prefWidth="59.0" text="Zapisz">
       <font>
          <Font name="Arial Bold" size="12.0" />
       </font>
@@ -131,7 +131,7 @@
          <Font size="14.0" />
       </font>
    </Text>
-   <Button fx:id="saveCiphertextButton" layoutX="556.0" layoutY="439.0" mnemonicParsing="false" prefHeight="19.0" prefWidth="59.0" text="Zapisz">
+   <Button fx:id="saveCiphertextButton" layoutX="556.0" layoutY="439.0" mnemonicParsing="false" onAction="#onSaveCipherTextButtonClicked" prefHeight="19.0" prefWidth="59.0" text="Zapisz">
       <font>
          <Font name="Arial Bold" size="12.0" />
       </font>

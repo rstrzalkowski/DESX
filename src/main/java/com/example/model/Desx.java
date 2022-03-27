@@ -144,35 +144,24 @@ public class Desx {
         divideData(allBytes, false);
 
         int counter = 0;
-        byte[] left;
-        byte[] right;
+        byte[] LPT;
+        byte[] RPT;
 
 
         for (DataBlock block : blocks) {
-            left = block.getLPT();
-            right = block.getRPT();
-            byte[] sixBits = new byte[6];
-            byte[] afterSBox = new byte[32];
+
+            LPT = block.getLPT();
+            RPT = block.getRPT();
             Key key = new Key(key2.getStrKey()); //stan klucza się zmienia po każdym key.roundEncrypt() wiec tworzymy tymczasowy klucz
-            byte sBoxResult;
 
             for (int i = 0; i < 16; i++) {
-                tmp = right;                                                                //zapamietanie RPT, by potem przypisać do LPT
-                byte[] subKey = key.roundEncrypt(i, false);                                       //generowanie 48 bitowego podklucza poprzez przesuwanie bitów i permutacje
-                right = TabUtils.permutate(expansionPermutationPattern, right, 48);   //permutacja rozszerzająca RPT z 32 do 48 bitów
-                right = TabUtils.xor(right, subKey);                                        //xorowanie RPT z podkluczem
-                for (int j = 0; j < 8; j++) {
-                    System.arraycopy(right, j*6, sixBits, 0, 6);
-                    sBoxResult = sBox[(j * 64) + calculatePosition(sixBits)]; //Sboxy
-                    System.arraycopy(TabUtils.byteToBits(sBoxResult), 4, afterSBox, j * 4, 4); //od 4 bo bajta przedstawiamy jako 8 bitów a potrzebujemy 4 najmniejszych
-                }
-                afterSBox = TabUtils.permutate(patternPermutation, afterSBox, 32);
-
-                right = TabUtils.xor(left, afterSBox);
-                left = tmp;
+                tmp = RPT;                                                                //zapamietanie RPT, by potem przypisać do LPT
+                byte[] subKey = key.roundEncrypt(i, false);                     //generowanie 48 bitowego podklucza poprzez przesuwanie bitów i permutacje
+                RPT = subKeyOperation(subKey, RPT, LPT);
+                LPT = tmp;
         }
-            System.arraycopy(right, 0, cipherText, 0, 32);
-            System.arraycopy(left, 0, cipherText, 32, 32);
+            System.arraycopy(RPT, 0, cipherText, 0, 32);
+            System.arraycopy(LPT, 0, cipherText, 32, 32);
 
             cipherText = TabUtils.permutate(finalPermutation, cipherText, 64);
             cipherText = TabUtils.xor(key3.getBitBlock(), cipherText);  //xorowanie końcowego bloku danych z trzecim kluczem
@@ -188,35 +177,22 @@ public class Desx {
         divideData(allBytes, true);
 
         int counter = 0;
-        byte[] left;
-        byte[] right;
-
+        byte[] LPT;
+        byte[] RPT;
 
         for (DataBlock block : blocks) {
-            left = block.getLPT();
-            right = block.getRPT();
-            byte[] sixBits = new byte[6];
-            byte[] afterSBox = new byte[32];
+            LPT = block.getLPT();
+            RPT = block.getRPT();
             Key key = new Key(key2.getStrKey()); //stan klucza się zmienia po każdym key.roundEncrypt() wiec tworzymy tymczasowy klucz
-            byte sBoxResult;
 
             for (int i = 16; i > 0; i--) {
-                tmp = right;                                                                //zapamietanie RPT, by potem przypisać do LPT
-                byte[] subKey = key.roundEncrypt(i, true);                                       //generowanie 48 bitowego podklucza poprzez przesuwanie bitów i permutacje
-                right = TabUtils.permutate(expansionPermutationPattern, right, 48);   //permutacja rozszerzająca RPT z 32 do 48 bitów
-                right = TabUtils.xor(right, subKey);                                        //xorowanie RPT z podkluczem
-                for (int j = 0; j < 8; j++) {
-                    System.arraycopy(right, j*6, sixBits, 0, 6);
-                    sBoxResult = sBox[(j * 64) + calculatePosition(sixBits)];
-                    System.arraycopy(TabUtils.byteToBits(sBoxResult), 4, afterSBox, j * 4, 4); //od 4 bo bajta przedstawiamy jako 8 bitów a potrzebujemy 4 najmniejszych
-                }
-                afterSBox = TabUtils.permutate(patternPermutation, afterSBox, 32);
-
-                right = TabUtils.xor(left, afterSBox);
-                left = tmp;
+                tmp = RPT;                                                                //zapamietanie RPT, by potem przypisać do LPT
+                byte[] subKey = key.roundEncrypt(i, true);                     //generowanie 48 bitowego podklucza poprzez przesuwanie bitów i permutacje
+                RPT = subKeyOperation(subKey, RPT, LPT);
+                LPT = tmp;
             }
-            System.arraycopy(right, 0, cipherText, 0, 32);
-            System.arraycopy(left, 0, cipherText, 32, 32);
+            System.arraycopy(RPT, 0, cipherText, 0, 32);
+            System.arraycopy(LPT, 0, cipherText, 32, 32);
 
             cipherText = TabUtils.permutate(finalPermutation, cipherText, 64);
             cipherText = TabUtils.xor(key1.getBitBlock(), cipherText);  //xorowanie końcowego bloku danych z pierwszym kluczem
@@ -225,6 +201,22 @@ public class Desx {
 
     }
 
+    private byte[] subKeyOperation(byte[] subKey, byte[] RPT, byte[] LPT) {
+        byte[] sixBits = new byte[6];
+        byte sBoxResult;
+        byte[] afterSBox = new byte[32];
+        RPT = TabUtils.permutate(expansionPermutationPattern, RPT, 48);   //permutacja rozszerzająca RPT z 32 do 48 bitów
+        RPT = TabUtils.xor(RPT, subKey);                                        //xorowanie RPT z podkluczem
+        for (int j = 0; j < 8; j++) {
+            System.arraycopy(RPT, j*6, sixBits, 0, 6);
+            sBoxResult = sBox[(j * 64) + calculatePosition(sixBits)]; //Sboxy
+            System.arraycopy(TabUtils.byteToBits(sBoxResult), 4, afterSBox, j * 4, 4); //od 4 bo bajta przedstawiamy jako 8 bitów a potrzebujemy 4 najmniejszych
+        }
+        afterSBox = TabUtils.permutate(patternPermutation, afterSBox, 32);
+
+        RPT = TabUtils.xor(LPT, afterSBox);
+        return RPT;
+    }
 
     public String getCipherText() {
         StringBuilder cipherText = new StringBuilder();

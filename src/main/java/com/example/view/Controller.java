@@ -7,10 +7,7 @@ import javafx.scene.control.*;
 import com.example.model.Desx;
 import javafx.stage.FileChooser;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.regex.Pattern;
@@ -67,7 +64,7 @@ public class Controller {
 
     public static void addTextLimiter(final TextField tf, final int maxLength) {
         tf.textProperty().addListener((ov, oldValue, newValue) -> {
-            Pattern pattern = Pattern.compile("([0-9a-fA-F])+");
+            Pattern pattern = Pattern.compile("([0-9a-fA-F])*");
             if (tf.getText().length() > maxLength) {
                 String s = tf.getText().substring(0, maxLength);
                 tf.setText(s);
@@ -116,7 +113,6 @@ public class Controller {
             a.show();
         }
 
-
     }
 
     @FXML
@@ -128,10 +124,9 @@ public class Controller {
             Alert a = new Alert(Alert.AlertType.ERROR);
             a.setTitle("Error");
             a.setHeaderText(null);
-            a.setContentText("Któryś z kluczy nie ma 16 znaków");
+            a.setContentText("Któryś z kluczy nie ma 16 znaków!");
             a.show();
         }
-
 
     }
 
@@ -151,7 +146,7 @@ public class Controller {
                 Alert a = new Alert(Alert.AlertType.ERROR);
                 a.setTitle("Error");
                 a.setHeaderText(null);
-                a.setContentText("Błąd podczas wczytywania pliku z tekstem jawnym");
+                a.setContentText("Błąd podczas wczytywania tekstu jawnego z pliku!");
                 a.show();
             }
 
@@ -165,19 +160,126 @@ public class Controller {
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Text Files", "*.txt"));
 
-        File selectedFile = fileChooser.showOpenDialog(openPlaintextButton.getScene().getWindow());
-        if(selectedFile != null) {
+        File selectedFile = fileChooser.showOpenDialog(openCiphertextButton.getScene().getWindow());
+        if (selectedFile != null) {
             try {
                 String pt = Files.readString(Path.of(selectedFile.getAbsolutePath()));
                 ciphertext.setText(pt);
             } catch (IOException e) {
                 Alert a = new Alert(Alert.AlertType.ERROR);
-                a.setTitle("Błąd podczas wczytywania pliku z szyfrogramem");
+                a.setHeaderText(null);
+                a.setTitle("Błąd podczas wczytywania szyfrogramu z pliku!");
                 a.show();
             }
-
         }
     }
+
+    @FXML
+    public void onLoadKeysButtonClicked(ActionEvent event) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Otwórz plik z kluczami");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Text Files", "*.txt"));
+
+        File selectedFile = fileChooser.showOpenDialog(loadKeysButton.getScene().getWindow());
+        BufferedReader reader;
+        String line1 = "";
+        String line2= "";
+        String line3= "";
+        if (selectedFile != null) {
+            try {
+                reader = new BufferedReader(new FileReader(selectedFile.getAbsolutePath()));
+                line1 = reader.readLine();
+                line2 = reader.readLine();
+                line3 = reader.readLine();
+
+            } catch (Exception e) {
+                Alert a = new Alert(Alert.AlertType.ERROR);
+                a.setHeaderText(null);
+                a.setTitle("Błąd podczas wczytywania kluczy z pliku!");
+                a.show();
+            }
+            if(line1 != null && line1.length() > 0 && line1.matches("([0-9a-fA-F])+")) {
+                key1.setText(line1);
+            }
+            if(line2 != null && line2.length() > 0 && line2.matches("([0-9a-fA-F])+")) {
+                key2.setText(line2);
+            }
+            if(line3 != null && line3.length() > 0 && line3.matches("([0-9a-fA-F])+")) {
+                key3.setText(line3);
+            }
+        }
+    }
+
+    @FXML
+    public void onSaveKeysButtonClicked(ActionEvent event) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Zapisz klucze do pliku");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Text Files", "*.txt"));
+
+        File selectedFile = fileChooser.showSaveDialog(saveKeysButton.getScene().getWindow());
+        if (selectedFile != null) {
+            try {
+                FileWriter writer = new FileWriter(selectedFile);
+                writer.append(key1.getText()).append("\n");
+                writer.append(key2.getText()).append("\n");
+                writer.append(key3.getText()).append("\n");
+                writer.close();
+            } catch (IOException e) {
+                Alert a = new Alert(Alert.AlertType.ERROR);
+                a.setHeaderText(null);
+                a.setTitle("Błąd podczas zapisywania kluczy do pliku!");
+                a.show();
+            }
+        }
+    }
+
+    @FXML
+    public void onSavePlainTextButtonClicked(ActionEvent event) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Zapisz tekst jawny do pliku");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Text Files", "*.txt"));
+
+        File selectedFile = fileChooser.showSaveDialog(savePlaintextButton.getScene().getWindow());
+        if (selectedFile != null) {
+            try {
+                FileWriter writer = new FileWriter(selectedFile);
+                writer.write(plaintext.getText());
+                writer.close();
+            } catch (IOException e) {
+                Alert a = new Alert(Alert.AlertType.ERROR);
+                a.setHeaderText(null);
+                a.setTitle("Błąd podczas zapisywania tekstu jawnego do pliku!");
+                a.show();
+            }
+        }
+    }
+
+    @FXML
+    public void onSaveCipherTextButtonClicked(ActionEvent event) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Zapisz szyfrogram do pliku");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Text Files", "*.txt"));
+
+        File selectedFile = fileChooser.showSaveDialog(saveCiphertextButton.getScene().getWindow());
+        if (selectedFile != null) {
+            try {
+                FileWriter writer = new FileWriter(selectedFile);
+                writer.write(ciphertext.getText());
+                writer.close();
+            } catch (IOException e) {
+                Alert a = new Alert(Alert.AlertType.ERROR);
+                a.setHeaderText(null);
+                a.setTitle("Błąd podczas zapisywania szyfrogramu do pliku!");
+                a.show();
+            }
+        }
+    }
+
+
 
 
 }

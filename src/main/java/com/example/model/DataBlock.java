@@ -24,17 +24,6 @@ public class DataBlock {
         permutatedBitBlock = TabUtils.permutate(initialPermutationPattern, bitBlock, 64);
     }
 
-    public DataBlock(byte[] block, boolean isBitArr) {
-        if(isBitArr) {
-            bitBlock = block.clone();
-            permutatedBitBlock = TabUtils.permutate(initialPermutationPattern, bitBlock, 64);
-        } else {
-            bitBlock = TabUtils.bytesToBits(block);
-            permutatedBitBlock = TabUtils.permutate(initialPermutationPattern, bitBlock, 64);
-        }
-    }
-
-
     public byte[] getLPT() {
         byte[] LPT = new byte[32];
         System.arraycopy(permutatedBitBlock, 0, LPT, 0, 32);
