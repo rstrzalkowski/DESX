@@ -1,6 +1,6 @@
 package com.example.model;
 
-import javafx.scene.control.Tab;
+import java.util.Arrays;
 
 public class Key {
 
@@ -33,7 +33,7 @@ public class Key {
             46, 42, 50, 36, 29, 32};
 
 
-    private byte[] shiftTable = {
+    private byte[] shifts = {
             1, 1, 2, 2, 2, 2, 2, 2,
             1, 2, 2, 2, 2, 2, 2, 1, 0
     };
@@ -66,8 +66,12 @@ public class Key {
         }
     }
 
-    public byte[] roundEncrypt(int n) {
-        leftShift(shiftTable[n]);
+    public byte[] roundEncrypt(int n, boolean isEncrypted) {
+        if(isEncrypted) {
+            rightShift(shifts[n]);
+        } else {
+            leftShift(shifts[n]);
+        }
         connectBlock();
         permutatedKey = TabUtils.permutate(pattern56to48, connectedBlock, 48);
         return permutatedKey;

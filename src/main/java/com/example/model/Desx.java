@@ -128,7 +128,7 @@ public class Desx {
         return TabUtils.bitsToInt(row) * 16 + TabUtils.bitsToInt(column);
     }
 
-    public void encode(String text) {
+    public void encrypt(String text, boolean isEncrypted) {
 
         byte[] allBytes = TabUtils.stringToBytes(text);
 
@@ -137,6 +137,7 @@ public class Desx {
         int counter = 0;
         byte[] left;
         byte[] right;
+
 
         for (DataBlock block : blocks) {
             left = block.getLPT();
@@ -148,7 +149,7 @@ public class Desx {
 
             for (int i = 0; i < 16; i++) {
                 tmp = right;                                                                //zapamietanie RPT, by potem przypisać do LPT
-                byte[] subKey = key2.roundEncrypt(i);                                       //generowanie 48 bitowego podklucza poprzez przesuwanie bitów i permutacje
+                byte[] subKey = key2.roundEncrypt(i, isEncrypted);                                       //generowanie 48 bitowego podklucza poprzez przesuwanie bitów i permutacje
                 right = TabUtils.permutate(expansionPermutationPattern, right, 48);   //permutacja rozszerzająca RPT z 32 do 48 bitów
                 right = TabUtils.xor(right, subKey);                                        //xorowanie RPT z podkluczem
                 for (int j = 0; j < 8; j++) {
@@ -179,6 +180,24 @@ public class Desx {
 
         }
         return cipherText.toString();
+    }
+
+    public String getPlainText() {
+        StringBuilder plainText = new StringBuilder();
+        for (DataBlock dataBlock : cipherArr) {
+            plainText.append(TabUtils.bitsToInt(dataBlock.getPrimaryBitBlock()));
+
+        }
+        return plainText.toString();
+    }
+
+    public String getDecipherTextString() {
+        char[] tab = new char[decipherText.length/8];
+        for (int i = 0; i < decipherText.length/8; i++) {
+            tab[i] = (char) (ToTab.toInt(ToTab.cutTab(decipherText, i*8, 8)));
+        }
+
+        return new String(tab);
     }
 
 
