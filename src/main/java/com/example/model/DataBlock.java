@@ -51,11 +51,4 @@ public class DataBlock {
         return bitBlock;
     }
 
-    @Override
-    public String toString() {
-        return new org.apache.commons.lang3.builder.ToStringBuilder(this)
-                .append("bitBlock", bitBlock)
-                .append("permutatedBitBlock", permutatedBitBlock)
-                .toString();
-    }
 }
