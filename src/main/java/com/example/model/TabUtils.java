@@ -11,10 +11,10 @@ public class TabUtils {
     }
 
 
-    public static char[] stringToChars(String text) {
-        char[] result = new char[text.length()];
+    public static byte[] stringToBytes(String text) {
+        byte[] result = new byte[text.length()];
         for (int i = 0; i < text.length(); i++) {
-            result[i] = text.charAt(i);
+            result[i] = (byte) text.charAt(i);
         }
 
         return result;
@@ -26,7 +26,7 @@ public class TabUtils {
         int counter = 0;
         for (int i = 0; i < block.length * 8; i++) {
             if ((i%8) == 0) {
-                String tmp = Integer.toBinaryString(block[counter++]);
+                String tmp = TabUtils.byteToString(block[counter++]);
                 string = "00000000".substring(tmp.length()) + tmp;
             }
             if(string.charAt(i % 8) == '0') {
@@ -39,23 +39,17 @@ public class TabUtils {
         return bitBlock;
     }
 
-    public static byte[] charsToBits(char[] block) {
-        byte[] bitBlock = new byte[block.length * 8];
-        String string = "";
-        int counter = 0;
-        for (int i = 0; i < block.length * 8; i++) {
-            if ((i%8) == 0) {
-                String tmp = Integer.toBinaryString(block[counter++]);
-                string = "00000000".substring(tmp.length()) + tmp;
-            }
-            if(string.charAt(i % 8) == '0') {
-                bitBlock[i] = 0;
-            } else {
-                bitBlock[i] = 1;
-            }
 
+    private static String byteToString(byte byte1) {
+        StringBuilder builder = new StringBuilder();
+        for ( int j = 0; j < 8; j++ )
+        {
+            byte tmp =  (byte) ( byte1 >> j );
+            int expect1 = tmp & 1;
+
+            builder.append(expect1);
         }
-        return bitBlock;
+        return ( builder.reverse().toString() );
     }
 
     public static byte[] byteToBits(byte number) {
@@ -63,7 +57,7 @@ public class TabUtils {
         String string = "";
         for (int i = 0; i < 8; i++) {
             if (i == 0) {
-                String tmp = Integer.toBinaryString(number);
+                String tmp = TabUtils.byteToString(number);
                 string = "00000000".substring(tmp.length()) + tmp;
             }
             if(string.charAt(i) == '0') {
@@ -101,6 +95,19 @@ public class TabUtils {
         return binStringToBits(input);
     }
 
+    public static String bytesToString(byte[] block) {
+        StringBuilder string = new StringBuilder();
+        for (byte b : block) {
+            String s = TabUtils.byteToString(b);
+            char c = TabUtils.binStringToChar(s);
+            string.append(c);
+        }
+
+        return string.toString();
+
+        //return new String(block, Charset.forName("UTF-8"));
+    }
+
     public static String bitsToHex(byte[] bits) {
         StringBuilder hex = new StringBuilder();
         byte[] tmp = new byte[4];
@@ -109,6 +116,73 @@ public class TabUtils {
             hex.append(Integer.toHexString(bitsToInt(tmp)));
         }
         return hex.toString();
+
+    }
+
+    public static byte[] bitsToBytes(byte[] bits) {
+        byte[] result = new byte[8];
+        byte[] tmp = new byte[8];
+
+        for(int i = 0; i < 8; i++) {
+            System.arraycopy(bits, i * 8, tmp, 0, 8);
+            String s = TabUtils.bitsToBinString(tmp);
+            byte byte1 = TabUtils.binStringToByte(s);
+            result[i] = byte1;
+        }
+        return result;
+    }
+
+    public static String bitsToBinString(byte[] bits) {
+        StringBuilder s = new StringBuilder();
+        for(int i = 0; i < bits.length; i++) {
+            if (bits[i] == 0) {
+                s.append("0");
+            } else {
+                s.append("1");
+            }
+
+        }
+        return s.toString();
+    }
+
+    public static byte binStringToByte(String text) {
+        byte b = 0;
+        byte temp = 1;
+
+        if (text.charAt(0) == '1') {
+            temp = -1;
+            for (int i = 7;i > 0; i--) {
+                if (text.charAt(i) == '0') {
+                    b += temp;
+
+                }
+                temp *= 2;
+            }
+            b -= 1;
+        } else {
+            for (int i = 7;i > 0; i--) {
+                if (text.charAt(i) == '1') {
+                    b += temp;
+
+                }
+                temp *= 2;
+            }
+        }
+        return b;
+
+    }
+
+    public static char binStringToChar(String text) {
+        char c = 0;
+        byte temp = 1;
+
+            for (int i = 7;i >= 0; i--) {
+                if (text.charAt(i) == '1') {
+                    c += temp;
+                }
+                temp *= 2;
+            }
+        return c;
 
     }
 

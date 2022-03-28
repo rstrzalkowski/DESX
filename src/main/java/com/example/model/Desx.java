@@ -1,5 +1,7 @@
 package com.example.model;
 
+import java.util.Arrays;
+
 public class Desx {
 
     private final byte[] expansionPermutationPattern = {
@@ -86,7 +88,7 @@ public class Desx {
         this.key3 = new Key(key3);
     }
 
-    public void divideData(char[] allBytes, boolean isEncrypted) {
+    public void divideData(byte[] allBytes) {
 
         int numberOfWholeBlocks = allBytes.length / 8;
         if(allBytes.length % 8 == 0) {
@@ -97,32 +99,24 @@ public class Desx {
             cipherArr = new DataBlock[numberOfWholeBlocks + 1];
         }
 
-        int counter = 0;
         int blockCounter = 0;
         for (int i = 0; i < numberOfWholeBlocks; i++) {
-            byte[] tmp = new byte[64];
-            for (int j = 0; j < 64; j++) {
-                tmp[j] = TabUtils.charsToBits(allBytes)[counter++];
-
-            }
+            byte[] tmp = new byte[8];
+            System.arraycopy(allBytes, i * 8, tmp, 0, 8);
             blocks[blockCounter++] = new DataBlock(tmp);
         }
         if (allBytes.length % 8 != 0) {
-            byte[] tmp = new byte[64];
-            for (int k = 0; k < (allBytes.length % 8) * 8; k++) {
-                tmp[k] = TabUtils.charsToBits(allBytes)[counter++];
-            }
+            byte[] tmp = new byte[8];
+            System.arraycopy(allBytes, numberOfWholeBlocks * 8, tmp, 0, allBytes.length % 8);
 
             blocks[blockCounter] = new DataBlock(tmp);
         }
 
     }
 
-    public void encrypt(String text) {
+    public void encrypt(byte[] allBytes) {
 
-        char[] allBytes = TabUtils.stringToChars(text);
-
-        divideData(allBytes, false);
+        divideData(allBytes);
 
         int counter = 0;
         byte[] LPT;
@@ -147,17 +141,15 @@ public class Desx {
             System.arraycopy(LPT, 0, cipherText, 32, 32);
 
             cipherText = TabUtils.permutate(finalPermutation, cipherText, 64);
-            cipherText = TabUtils.xor(key3.getBitBlock(), cipherText);  //xorowanie końcowego bloku danych z trzecim kluczem
-            cipherArr[counter++] = new DataBlock(cipherText);
+            cipherText = TabUtils.xor(key3.getBitBlock(), cipherText); //xorowanie końcowego bloku danych z trzecim kluczem
+            cipherArr[counter++] = new DataBlock(TabUtils.bitsToBytes(cipherText));
         }
 
     }
 
-    public void decrypt(String text) {
+    public void decrypt(byte[] allBytes) {
 
-        char[] allBytes = TabUtils.stringToChars(text);
-
-        divideData(allBytes, true);
+        divideData(allBytes);
 
         int counter = 0;
         byte[] LPT;
@@ -182,7 +174,7 @@ public class Desx {
 
             cipherText = TabUtils.permutate(finalPermutation, cipherText, 64);
             cipherText = TabUtils.xor(key1.getBitBlock(), cipherText);  //xorowanie końcowego bloku danych z pierwszym kluczem
-            cipherArr[counter++] = new DataBlock(cipherText);
+            cipherArr[counter++] = new DataBlock(TabUtils.bitsToBytes(cipherText));
         }
 
     }

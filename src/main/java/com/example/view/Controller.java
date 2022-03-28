@@ -8,8 +8,11 @@ import com.example.model.Desx;
 import javafx.stage.FileChooser;
 
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.regex.Pattern;
 
 import static java.nio.file.Files.readString;
@@ -85,8 +88,9 @@ public class Controller {
 
     private void encrypt() {
         String pt = plaintext.getText();
+        byte[] allBytes = pt.getBytes(StandardCharsets.UTF_8);
         Desx desx = new Desx(key1.getText(), key2.getText(), key3.getText());
-        desx.encrypt(pt);
+        desx.encrypt(allBytes);
 
         ciphertext.setText(desx.getCipherText());
     }
@@ -95,7 +99,7 @@ public class Controller {
         String ctHex = ciphertext.getText();
         String ctStr = TabUtils.hexToAscii(ctHex);
         Desx desx = new Desx(key1.getText(), key2.getText(), key3.getText());
-        desx.decrypt(ctStr);
+        desx.decrypt(TabUtils.stringToBytes(ctStr));
 
         plaintext.setText(desx.getPlainText());
     }
@@ -134,14 +138,21 @@ public class Controller {
     public void onLoadPlainTextButtonClicked(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Otwórz plik z tekstem jawnym");
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Text Files", "*.txt"));
+
 
         File selectedFile = fileChooser.showOpenDialog(openPlaintextButton.getScene().getWindow());
         if(selectedFile != null) {
             try {
-                String pt = Files.readString(Path.of(selectedFile.getAbsolutePath()));
-                plaintext.setText(pt);
+                byte[] allBytes = Files.readAllBytes(Path.of(selectedFile.getAbsolutePath()));
+
+                Desx desx = new Desx(key1.getText(), key2.getText(), key3.getText());
+                desx.encrypt(allBytes);
+                ciphertext.setText(desx.getCipherText());
+
+
+                String text = TabUtils.bytesToString(allBytes);
+                plaintext.setText(text);
+
             } catch (IOException e) {
                 Alert a = new Alert(Alert.AlertType.ERROR);
                 a.setTitle("Error");
@@ -157,14 +168,14 @@ public class Controller {
     public void onLoadCipherTextButtonClicked(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Otwórz plik z szyfrogramem");
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Text Files", "*.txt"));
+
 
         File selectedFile = fileChooser.showOpenDialog(openCiphertextButton.getScene().getWindow());
         if (selectedFile != null) {
             try {
-                String pt = Files.readString(Path.of(selectedFile.getAbsolutePath()));
-                ciphertext.setText(pt);
+                byte[] allBytes = Files.readAllBytes(Path.of(selectedFile.getAbsolutePath()));
+                String text = TabUtils.bytesToString(allBytes);
+                ciphertext.setText(text);
             } catch (IOException e) {
                 Alert a = new Alert(Alert.AlertType.ERROR);
                 a.setHeaderText(null);
@@ -239,15 +250,11 @@ public class Controller {
     public void onSavePlainTextButtonClicked(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Zapisz tekst jawny do pliku");
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Text Files", "*.txt"));
 
         File selectedFile = fileChooser.showSaveDialog(savePlaintextButton.getScene().getWindow());
         if (selectedFile != null) {
             try {
-                FileWriter writer = new FileWriter(selectedFile);
-                writer.write(plaintext.getText());
-                writer.close();
+                Files.write(selectedFile.toPath(), TabUtils.stringToBytes(plaintext.getText()));
             } catch (IOException e) {
                 Alert a = new Alert(Alert.AlertType.ERROR);
                 a.setHeaderText(null);
@@ -261,15 +268,11 @@ public class Controller {
     public void onSaveCipherTextButtonClicked(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Zapisz szyfrogram do pliku");
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Text Files", "*.txt"));
 
         File selectedFile = fileChooser.showSaveDialog(saveCiphertextButton.getScene().getWindow());
         if (selectedFile != null) {
             try {
-                FileWriter writer = new FileWriter(selectedFile);
-                writer.write(ciphertext.getText());
-                writer.close();
+                Files.write(selectedFile.toPath(), TabUtils.stringToBytes(ciphertext.getText()));
             } catch (IOException e) {
                 Alert a = new Alert(Alert.AlertType.ERROR);
                 a.setHeaderText(null);

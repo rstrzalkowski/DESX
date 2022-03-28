@@ -2,10 +2,12 @@ package com.example.model;
 
 import javafx.scene.control.Tab;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+
 public class DataBlock {
 
-    private byte[] bitBlock;
-    private byte[] permutatedBitBlock;
+    private byte[] byteBlock;
 
     private byte[] initialPermutationPattern = {
             58, 50, 42, 34, 26, 18, 10, 2,
@@ -20,29 +22,34 @@ public class DataBlock {
 
 
     public DataBlock(byte[] block) {
-        bitBlock = block.clone();
-        permutatedBitBlock = TabUtils.permutate(initialPermutationPattern, bitBlock, 64);
+        byteBlock = block.clone();
+    }
+
+    public byte[] getPermutatedBitBlock() {
+        return TabUtils.permutate(initialPermutationPattern, TabUtils.bytesToBits(byteBlock), 64);
     }
 
     public byte[] getLPT() {
+        //byte[] bitBlock = getPermutatedBitBlock();
         byte[] LPT = new byte[32];
-        System.arraycopy(permutatedBitBlock, 0, LPT, 0, 32);
+        System.arraycopy(getPermutatedBitBlock(), 0, LPT, 0, 32);
         return LPT;
     }
 
     public byte[] getRPT() {
         byte[] RPT = new byte[32];
-        System.arraycopy(permutatedBitBlock, 32, RPT, 0, 32);
+        System.arraycopy(getPermutatedBitBlock(), 32, RPT, 0, 32);
         return RPT;
     }
 
     public void xorBlock(byte[] arr) {
-        bitBlock = TabUtils.xor(bitBlock, arr);
-        permutatedBitBlock = TabUtils.permutate(initialPermutationPattern, bitBlock, 64);
+        byte[] tmp = TabUtils.bytesToBits(byteBlock);
+        byte[] xored = TabUtils.xor(tmp, arr);
+        byteBlock = TabUtils.bitsToBytes(xored);
     }
 
     public byte[] getPrimaryBitBlock() {
-        return bitBlock;
+        return TabUtils.bytesToBits(byteBlock);
     }
 
 }
