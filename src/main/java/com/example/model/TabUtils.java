@@ -40,7 +40,7 @@ public class TabUtils {
     }
 
 
-    private static String byteToString(byte byte1) {
+    public static String byteToString(byte byte1) {
         StringBuilder builder = new StringBuilder();
         for ( int j = 0; j < 8; j++ )
         {
