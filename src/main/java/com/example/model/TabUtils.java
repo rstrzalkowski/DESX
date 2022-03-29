@@ -2,6 +2,18 @@ package com.example.model;
 
 public class TabUtils {
 
+    public static byte[] getInitialPermutationPattern() {
+        return new byte[]{
+                58, 50, 42, 34, 26, 18, 10, 2,
+                60, 52, 44, 36, 28, 20, 12, 4,
+                62, 54, 46, 38, 30, 22, 14, 6,
+                64, 56, 48, 40, 32, 24, 16, 8,
+                57, 49, 41, 33, 25, 17,  9, 1,
+                59, 51, 43, 35, 27, 19, 11, 3,
+                61, 53, 45, 37, 29, 21, 13, 5,
+                63, 55, 47, 39, 31, 23, 15, 7};
+    }
+
     public static byte[] permutate(byte[] pattern, byte[] block, int length) {
         byte[] newBlock = new byte[length];
         for (int i = 0; i < length; i++) {
@@ -10,9 +22,9 @@ public class TabUtils {
         return newBlock;
     }
 
-
     public static byte[] stringToBytes(String text) {
         byte[] result = new byte[text.length()];
+
         for (int i = 0; i < text.length(); i++) {
             result[i] = (byte) text.charAt(i);
         }
@@ -26,7 +38,7 @@ public class TabUtils {
         int counter = 0;
         for (int i = 0; i < block.length * 8; i++) {
             if ((i%8) == 0) {
-                String tmp = TabUtils.byteToString(block[counter++]);
+                String tmp = TabUtils.byteToBinString(block[counter++]);
                 string = "00000000".substring(tmp.length()) + tmp;
             }
             if(string.charAt(i % 8) == '0') {
@@ -40,7 +52,7 @@ public class TabUtils {
     }
 
 
-    public static String byteToString(byte byte1) {
+    public static String byteToBinString(byte byte1) {
         StringBuilder builder = new StringBuilder();
         for ( int j = 0; j < 8; j++ )
         {
@@ -57,7 +69,7 @@ public class TabUtils {
         String string = "";
         for (int i = 0; i < 8; i++) {
             if (i == 0) {
-                String tmp = TabUtils.byteToString(number);
+                String tmp = TabUtils.byteToBinString(number);
                 string = "00000000".substring(tmp.length()) + tmp;
             }
             if(string.charAt(i) == '0') {
@@ -98,14 +110,13 @@ public class TabUtils {
     public static String bytesToString(byte[] block) {
         StringBuilder string = new StringBuilder();
         for (byte b : block) {
-            String s = TabUtils.byteToString(b);
+            String s = TabUtils.byteToBinString(b);
             char c = TabUtils.binStringToChar(s);
             string.append(c);
         }
 
         return string.toString();
 
-        //return new String(block, Charset.forName("UTF-8"));
     }
 
     public static String bitsToHex(byte[] bits) {
@@ -134,8 +145,8 @@ public class TabUtils {
 
     public static String bitsToBinString(byte[] bits) {
         StringBuilder s = new StringBuilder();
-        for(int i = 0; i < bits.length; i++) {
-            if (bits[i] == 0) {
+        for (byte bit : bits) {
+            if (bit == 0) {
                 s.append("0");
             } else {
                 s.append("1");
@@ -187,13 +198,16 @@ public class TabUtils {
     }
 
     public static String bitsToString(byte[] bits) {
-        StringBuilder str = new StringBuilder();
-        byte[] tmp = new byte[8];
-        for (int i = 0; i < bits.length / 8; i++) {
-            System.arraycopy(bits, i * 8, tmp, 0, 8);
-            str.append(Character.toString(TabUtils.bitsToInt(tmp)));
-        }
-        return str.toString();
+
+        return bytesToString(bitsToBytes(bits));
+
+//        StringBuilder str = new StringBuilder();
+//        byte[] tmp = new byte[8];
+//        for (int i = 0; i < bits.length / 8; i++) {
+//            System.arraycopy(bits, i * 8, tmp, 0, 8);
+//            str.append(Character.toString(TabUtils.bitsToInt(tmp)));
+//        }
+//        return str.toString();
 
     }
 

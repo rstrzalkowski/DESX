@@ -144,11 +144,9 @@ public class Controller {
         if(selectedFile != null) {
             try {
                 byte[] allBytes = Files.readAllBytes(Path.of(selectedFile.getAbsolutePath()));
-
                 Desx desx = new Desx(key1.getText(), key2.getText(), key3.getText());
                 desx.encrypt(allBytes);
                 ciphertext.setText(desx.getCipherText());
-
 
                 String text = TabUtils.bytesToString(allBytes);
                 plaintext.setText(text);

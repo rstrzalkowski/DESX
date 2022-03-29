@@ -1,7 +1,5 @@
 package com.example.model;
 
-import java.util.Arrays;
-
 public class Desx {
 
     private final byte[] expansionPermutationPattern = {
@@ -74,6 +72,7 @@ public class Desx {
             2, 1, 14, 7, 4, 10, 8, 13, 15, 12, 9, 0, 3, 5, 6, 11
             };
 
+
     private DataBlock[] blocks;
     private byte[] cipherText = new byte[64];
     private DataBlock[] cipherArr;
@@ -108,7 +107,6 @@ public class Desx {
         if (allBytes.length % 8 != 0) {
             byte[] tmp = new byte[8];
             System.arraycopy(allBytes, numberOfWholeBlocks * 8, tmp, 0, allBytes.length % 8);
-
             blocks[blockCounter] = new DataBlock(tmp);
         }
 
@@ -121,7 +119,6 @@ public class Desx {
         int counter = 0;
         byte[] LPT;
         byte[] RPT;
-
 
         for (DataBlock block : blocks) {
 

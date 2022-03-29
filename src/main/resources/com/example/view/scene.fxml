@@ -5,7 +5,7 @@
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.effect.ColorAdjust?>
-<?import javafx.scene.effect.Glow?>
+<?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
@@ -88,12 +88,12 @@
    </Button>
    <TextArea fx:id="ciphertext" focusTraversable="false" layoutX="371.0" layoutY="172.0" prefHeight="256.0" prefWidth="238.0" wrapText="true">
       <effect>
-         <Glow />
+         <DropShadow blurType="ONE_PASS_BOX" spread="0.28" />
       </effect>
    </TextArea>
    <TextArea fx:id="plaintext" focusTraversable="false" layoutX="22.0" layoutY="170.0" prefHeight="256.0" prefWidth="238.0" wrapText="true">
       <effect>
-         <Glow />
+         <DropShadow blurType="ONE_PASS_BOX" spread="0.28" />
       </effect>
    </TextArea>
    <Button fx:id="encryptButton" layoutX="270.0" layoutY="215.0" mnemonicParsing="false" onAction="#onEncryptButtonClick" prefHeight="25.0" prefWidth="92.0" text="Szyfruj-&gt;">
