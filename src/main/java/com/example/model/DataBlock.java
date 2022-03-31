@@ -9,30 +9,28 @@ public class DataBlock {
         byteBlock = block.clone();
     }
 
-    public byte[] getPermutatedBitBlock() {
-        return TabUtils.permutate(TabUtils.getInitialPermutationPattern(), TabUtils.bytesToBits(byteBlock), 64);
+    public byte[] getPermutatedByteBlock() {
+        return TabUtils.permutate(TabUtils.getInitialPermutationPattern(), byteBlock);
     }
 
     public byte[] getLPT() {
-        byte[] LPT = new byte[32];
-        System.arraycopy(getPermutatedBitBlock(), 0, LPT, 0, 32);
+        byte[] LPT = new byte[4];
+        System.arraycopy(getPermutatedByteBlock(), 0, LPT, 0, 4);
         return LPT;
     }
 
     public byte[] getRPT() {
-        byte[] RPT = new byte[32];
-        System.arraycopy(getPermutatedBitBlock(), 32, RPT, 0, 32);
+        byte[] RPT = new byte[4];
+        System.arraycopy(getPermutatedByteBlock(), 4, RPT, 0, 4);
         return RPT;
     }
 
     public void xorBlock(byte[] arr) {
-        byte[] tmp = TabUtils.bytesToBits(byteBlock);
-        byte[] xored = TabUtils.xor(tmp, arr);
-        byteBlock = TabUtils.bitsToBytes(xored);
+        byteBlock = TabUtils.xor(byteBlock, arr);
     }
 
-    public byte[] getPrimaryBitBlock() {
-        return TabUtils.bytesToBits(byteBlock);
+    public byte[] getPrimaryByteBlock() {
+        return byteBlock;
     }
 
 }

@@ -106,12 +106,12 @@
          <Font name="Arial Bold" size="12.0" />
       </font>
    </Button>
-   <RadioButton fx:id="fileRadio" layoutX="282.0" layoutY="311.0" mnemonicParsing="false" prefHeight="17.0" prefWidth="76.0" text="Plik">
+   <RadioButton fx:id="fileRadio" layoutX="279.0" layoutY="321.0" mnemonicParsing="false" onAction="#onFileToggleRadioClick" prefHeight="17.0" prefWidth="76.0" text="Plik">
       <font>
          <Font size="13.0" />
       </font>
    </RadioButton>
-   <RadioButton fx:id="windowRadio" layoutX="282.0" layoutY="338.0" mnemonicParsing="false" prefHeight="17.0" prefWidth="76.0" text="Okno">
+   <RadioButton fx:id="windowRadio" layoutX="279.0" layoutY="347.0" mnemonicParsing="false" onAction="#onWindowToggleRadioClick" prefHeight="17.0" prefWidth="76.0" text="Okno">
       <font>
          <Font size="13.0" />
       </font>
@@ -146,4 +146,7 @@
          <Font name="Calibri" size="14.0" />
       </font>
    </Text>
+   <Text layoutX="305.0" layoutY="205.0" strokeType="OUTSIDE" strokeWidth="0.0" />
+   <Text fx:id="fileName" layoutX="290.0" layoutY="205.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Brak pliku" />
+   <Text fx:id="cipherFileName" layoutX="290.0" layoutY="303.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Brak pliku" />
 </AnchorPane>

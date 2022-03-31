@@ -6,10 +6,10 @@ import java.util.Arrays;
 public class Key {
 
     private final String strKey;
-    private final byte[] bitBlock;
+    private final byte[] byteBlock;
     private final byte[] leftBlock;
     private final byte[] rightBlock;
-    private final byte[] connectedBlock = new byte[56];
+    private final byte[] connectedBlock = new byte[7];
 
     private final byte[] leftPattern = {
             57, 49, 41, 33, 25, 17,  9,
@@ -44,14 +44,14 @@ public class Key {
     }
 
     public Key(String hexaKey) {
-        bitBlock = TabUtils.hexToBits(hexaKey);
+        byteBlock = TabUtils.hexStringToBytes(hexaKey);
         strKey = hexaKey;
-        leftBlock = TabUtils.permutate(leftPattern, bitBlock, 28);
-        rightBlock = TabUtils.permutate(rightPattern, bitBlock, 28);
+        leftBlock = TabUtils.permutate(leftPattern, byteBlock);
+        rightBlock = TabUtils.permutate(rightPattern, byteBlock);
     }
 
-    public byte[] getBitBlock() {
-        return bitBlock;
+    public byte[] getByteBlock() {
+        return byteBlock;
     }
 
     public void leftShift(int n) {
@@ -59,16 +59,15 @@ public class Key {
         byte tmpR;
 
         for (int j = 0; j < n; j++) {
-            tmpL = leftBlock[0];
-            tmpR = rightBlock[0];
+            tmpL = TabUtils.getBit(leftBlock, 0);
+            tmpR = TabUtils.getBit(rightBlock, 0);
 
             for (int i = 0; i < 27; i++) {
-                leftBlock[i] = leftBlock[i + 1];
-                rightBlock[i] = rightBlock[i + 1];
+                TabUtils.setBit(leftBlock, i, TabUtils.getBit(leftBlock, i + 1));
+                TabUtils.setBit(rightBlock, i, TabUtils.getBit(rightBlock, i + 1));
             }
-            leftBlock[27] = tmpL;
-            rightBlock[27] = tmpR;
-
+            TabUtils.setBit(leftBlock, 27, tmpL);
+            TabUtils.setBit(rightBlock, 27, tmpR);
         }
     }
 
@@ -79,8 +78,8 @@ public class Key {
             leftShift(shifts[n]);
         }
         connectBlock();
-        byte[] permutatedKey = TabUtils.permutate(pattern56to48, connectedBlock, 48);
-        return permutatedKey;
+
+        return TabUtils.permutate(pattern56to48, connectedBlock);
     }
 
     public void rightShift(int n) {
@@ -88,19 +87,25 @@ public class Key {
         byte tmpR;
 
         for (int j = 0; j < n; j++) {
-            tmpL = leftBlock[27];
-            tmpR = rightBlock[27];
+            tmpL = TabUtils.getBit(leftBlock, 27);
+            tmpR = TabUtils.getBit(rightBlock, 27);
+
             for (int i = 27; i > 0; i--) {
-                leftBlock[i] = leftBlock[i - 1];
-                rightBlock[i] = rightBlock[i - 1];
+                TabUtils.setBit(leftBlock, i, TabUtils.getBit(leftBlock, i - 1));
+                TabUtils.setBit(rightBlock, i, TabUtils.getBit(rightBlock, i - 1));
             }
-            leftBlock[0] = tmpL;
-            rightBlock[0] = tmpR;
+            TabUtils.setBit(leftBlock, 0, tmpL);
+            TabUtils.setBit(rightBlock, 0, tmpR);
         }
     }
 
     private void connectBlock() {
-        System.arraycopy(leftBlock, 0, connectedBlock, 0, 28);
-        System.arraycopy(rightBlock, 0, connectedBlock, 28, 28);
+        for (int i = 0; i < 28; i++) {
+            TabUtils.setBit(connectedBlock, i, TabUtils.getBit(leftBlock, i));
+        }
+
+        for (int j = 28; j < 56; j++) {
+            TabUtils.setBit(connectedBlock, j, TabUtils.getBit(rightBlock, j - 28));
+        }
     }
 }

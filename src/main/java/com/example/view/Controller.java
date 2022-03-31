@@ -5,14 +5,13 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import com.example.model.Desx;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 
 import java.io.*;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.regex.Pattern;
 
 import static java.nio.file.Files.readString;
@@ -50,8 +49,16 @@ public class Controller {
     private TextArea plaintext;
     @FXML
     private TextArea ciphertext;
+    @FXML
+    private Text fileName;
+    @FXML
+    private Text cipherFileName;
 
-    final ToggleGroup group = new ToggleGroup();
+    private final ToggleGroup group = new ToggleGroup();
+    private File filePT = null;
+    private File fileCT = null;
+    private byte[] allBytesPT;
+    private byte[] allBytesCT;
 
 
     @FXML
@@ -62,6 +69,7 @@ public class Controller {
 
         fileRadio.setToggleGroup(group);
         windowRadio.setToggleGroup(group);
+        windowRadio.setSelected(true);
     }
 
 
@@ -86,28 +94,79 @@ public class Controller {
         key3.setText("0022446688AACCEE");
     }
 
-    private void encrypt() {
-        String pt = plaintext.getText();
-        byte[] allBytes = pt.getBytes(StandardCharsets.UTF_8);
+    private void encrypt(boolean fromWindow) {
         Desx desx = new Desx(key1.getText(), key2.getText(), key3.getText());
-        desx.encrypt(allBytes);
+        if(fromWindow) {
+            String pt = plaintext.getText();
+            byte[] allBytes = pt.getBytes(StandardCharsets.UTF_8);
 
-        ciphertext.setText(desx.getCipherText());
+            desx.encrypt(allBytes);
+
+            ciphertext.setText(desx.getCipherText());
+        } else {
+            desx.encrypt(allBytesPT);
+            allBytesCT = desx.getBytes();
+            ciphertext.setText(desx.getCipherText());
+
+        }
+
     }
 
-    private void decrypt() {
-        String ctHex = ciphertext.getText();
-        String ctStr = TabUtils.hexToAscii(ctHex);
+    private void decrypt(boolean fromWindow) {
         Desx desx = new Desx(key1.getText(), key2.getText(), key3.getText());
-        desx.decrypt(TabUtils.stringToBytes(ctStr));
+        if(fromWindow) {
+            String ctHex = ciphertext.getText();
+            byte[] allBytes = TabUtils.hexStringToBytes(ctHex);
+
+            desx.decrypt(allBytes);
+
+            plaintext.setText(desx.getPlainText());
+            allBytesPT = desx.getBytes();
+        } else {
+
+            desx.decrypt(allBytesCT);
+
+            allBytesPT = desx.getBytes();
+            plaintext.setText(desx.getPlainText());
+
+        }
+
+
+
+
+
+       // desx.decrypt(TabUtils.stringToBytes(ctStr));
 
         plaintext.setText(desx.getPlainText());
     }
 
     @FXML
+    public void onFileToggleRadioClick(ActionEvent actionEvent) {
+        plaintext.setDisable(true);
+
+    }
+
+    public void onWindowToggleRadioClick(ActionEvent actionEvent) {
+        plaintext.setDisable(false);
+
+    }
+
+    @FXML
     public void onEncryptButtonClick(ActionEvent actionEvent) {
-        if(key1.getText().length() == 16 && key2.getText().length() == 16 && key3.getText().length() == 16){
-            encrypt();
+        if (key1.getText().length() == 16 && key2.getText().length() == 16 && key3.getText().length() == 16) {
+            if (windowRadio.isSelected()) {
+                encrypt(true);
+            } else if (filePT != null) {
+                encrypt(false);
+
+            } else {
+                Alert a = new Alert(Alert.AlertType.ERROR);
+                a.setTitle("Error");
+                a.setHeaderText(null);
+                a.setContentText("Nie wczytano żadnego pliku z tekstem jawnym!");
+                a.show();
+            }
+
         }
         else {
             Alert a = new Alert(Alert.AlertType.ERROR);
@@ -122,7 +181,18 @@ public class Controller {
     @FXML
     public void onDecryptButtonClick(ActionEvent actionEvent) {
         if(key1.getText().length() == 16 && key2.getText().length() == 16 && key3.getText().length() == 16){
-            decrypt();
+            if (windowRadio.isSelected()) {
+                decrypt(true);
+            } else if (fileCT != null) {
+                decrypt(false);
+
+            } else {
+                Alert a = new Alert(Alert.AlertType.ERROR);
+                a.setTitle("Error");
+                a.setHeaderText(null);
+                a.setContentText("Nie wczytano żadnego pliku z szyfrogramem!");
+                a.show();
+            }
         }
         else {
             Alert a = new Alert(Alert.AlertType.ERROR);
@@ -140,15 +210,14 @@ public class Controller {
         fileChooser.setTitle("Otwórz plik z tekstem jawnym");
 
 
-        File selectedFile = fileChooser.showOpenDialog(openPlaintextButton.getScene().getWindow());
-        if(selectedFile != null) {
-            try {
-                byte[] allBytes = Files.readAllBytes(Path.of(selectedFile.getAbsolutePath()));
-                Desx desx = new Desx(key1.getText(), key2.getText(), key3.getText());
-                desx.encrypt(allBytes);
-                ciphertext.setText(desx.getCipherText());
+        filePT = fileChooser.showOpenDialog(openPlaintextButton.getScene().getWindow());
+        if(filePT != null) {
 
-                String text = TabUtils.bytesToString(allBytes);
+            try {
+                allBytesPT = Files.readAllBytes(Path.of(filePT.getAbsolutePath()));
+
+
+                String text = TabUtils.bytesToString(allBytesPT);
                 plaintext.setText(text);
 
             } catch (IOException e) {
@@ -159,6 +228,11 @@ public class Controller {
                 a.show();
             }
 
+            fileName.setText(filePT.getName());
+
+
+
+
         }
     }
 
@@ -168,18 +242,19 @@ public class Controller {
         fileChooser.setTitle("Otwórz plik z szyfrogramem");
 
 
-        File selectedFile = fileChooser.showOpenDialog(openCiphertextButton.getScene().getWindow());
-        if (selectedFile != null) {
+        fileCT = fileChooser.showOpenDialog(openCiphertextButton.getScene().getWindow());
+        if (fileCT != null) {
             try {
-                byte[] allBytes = Files.readAllBytes(Path.of(selectedFile.getAbsolutePath()));
-                String text = TabUtils.bytesToString(allBytes);
-                ciphertext.setText(text);
+                allBytesCT = Files.readAllBytes(Path.of(fileCT.getAbsolutePath()));
+//                String text = TabUtils.bytesToHex(allBytesCT);
+//                ciphertext.setText(text);
             } catch (IOException e) {
                 Alert a = new Alert(Alert.AlertType.ERROR);
                 a.setHeaderText(null);
                 a.setTitle("Błąd podczas wczytywania szyfrogramu z pliku!");
                 a.show();
             }
+            cipherFileName.setText(fileCT.getName());
         }
     }
 
@@ -246,13 +321,17 @@ public class Controller {
 
     @FXML
     public void onSavePlainTextButtonClicked(ActionEvent event) {
+        if (allBytesPT == null) {
+            allBytesPT = TabUtils.stringToBytes(plaintext.getText());
+        }
+
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Zapisz tekst jawny do pliku");
 
         File selectedFile = fileChooser.showSaveDialog(savePlaintextButton.getScene().getWindow());
         if (selectedFile != null) {
             try {
-                Files.write(selectedFile.toPath(), TabUtils.stringToBytes(plaintext.getText()));
+                Files.write(selectedFile.toPath(), allBytesPT);
             } catch (IOException e) {
                 Alert a = new Alert(Alert.AlertType.ERROR);
                 a.setHeaderText(null);
@@ -264,13 +343,16 @@ public class Controller {
 
     @FXML
     public void onSaveCipherTextButtonClicked(ActionEvent event) {
+        allBytesCT = TabUtils.hexStringToBytes(ciphertext.getText());
+
+
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Zapisz szyfrogram do pliku");
 
         File selectedFile = fileChooser.showSaveDialog(saveCiphertextButton.getScene().getWindow());
         if (selectedFile != null) {
             try {
-                Files.write(selectedFile.toPath(), TabUtils.stringToBytes(ciphertext.getText()));
+                Files.write(selectedFile.toPath(), allBytesCT);
             } catch (IOException e) {
                 Alert a = new Alert(Alert.AlertType.ERROR);
                 a.setHeaderText(null);

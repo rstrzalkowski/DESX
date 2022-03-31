@@ -1,5 +1,7 @@
 package com.example.model;
 
+import java.util.Arrays;
+
 public class Desx {
 
     private final byte[] expansionPermutationPattern = {
@@ -74,7 +76,7 @@ public class Desx {
 
 
     private DataBlock[] blocks;
-    private byte[] cipherText = new byte[64];
+    private byte[] cipherText = new byte[8];
     private DataBlock[] cipherArr;
     private byte[] tmp;
     Key key1;
@@ -110,6 +112,7 @@ public class Desx {
             blocks[blockCounter] = new DataBlock(tmp);
         }
 
+
     }
 
     public void encrypt(byte[] allBytes) {
@@ -122,7 +125,7 @@ public class Desx {
 
         for (DataBlock block : blocks) {
 
-            block.xorBlock(key1.getBitBlock());
+            block.xorBlock(key1.getByteBlock()); //xor z 1 kluczem
 
             LPT = block.getLPT();
             RPT = block.getRPT();
@@ -134,12 +137,12 @@ public class Desx {
                 RPT = subKeyOperation(subKey, RPT, LPT);
                 LPT = tmp;
         }
-            System.arraycopy(RPT, 0, cipherText, 0, 32);
-            System.arraycopy(LPT, 0, cipherText, 32, 32);
+            System.arraycopy(RPT, 0, cipherText, 0, 4);
+            System.arraycopy(LPT, 0, cipherText, 4, 4);
 
-            cipherText = TabUtils.permutate(finalPermutation, cipherText, 64);
-            cipherText = TabUtils.xor(key3.getBitBlock(), cipherText); //xorowanie końcowego bloku danych z trzecim kluczem
-            cipherArr[counter++] = new DataBlock(TabUtils.bitsToBytes(cipherText));
+            cipherText = TabUtils.permutate(finalPermutation, cipherText);
+            cipherText = TabUtils.xor(key3.getByteBlock(), cipherText); //xorowanie końcowego bloku danych z trzecim kluczem
+            cipherArr[counter++] = new DataBlock(cipherText);
         }
 
     }
@@ -154,7 +157,7 @@ public class Desx {
 
         for (DataBlock block : blocks) {
 
-            block.xorBlock(key3.getBitBlock());
+            block.xorBlock(key3.getByteBlock());
 
             LPT = block.getLPT();
             RPT = block.getRPT();
@@ -166,44 +169,51 @@ public class Desx {
                 RPT = subKeyOperation(subKey, RPT, LPT);
                 LPT = tmp;
             }
-            System.arraycopy(RPT, 0, cipherText, 0, 32);
-            System.arraycopy(LPT, 0, cipherText, 32, 32);
+            System.arraycopy(RPT, 0, cipherText, 0, 4);
+            System.arraycopy(LPT, 0, cipherText, 4, 4);
 
-            cipherText = TabUtils.permutate(finalPermutation, cipherText, 64);
-            cipherText = TabUtils.xor(key1.getBitBlock(), cipherText);  //xorowanie końcowego bloku danych z pierwszym kluczem
-            cipherArr[counter++] = new DataBlock(TabUtils.bitsToBytes(cipherText));
+            cipherText = TabUtils.permutate(finalPermutation, cipherText);
+            cipherText = TabUtils.xor(key1.getByteBlock(), cipherText);  //xorowanie końcowego bloku danych z pierwszym kluczem
+            cipherArr[counter++] = new DataBlock(cipherText);
         }
 
     }
 
     private byte[] subKeyOperation(byte[] subKey, byte[] RPT, byte[] LPT) {
-        byte[] sixBits = new byte[6];
+        byte sixBits;
         byte sBoxResult;
-        byte[] afterSBox = new byte[32];
-        RPT = TabUtils.permutate(expansionPermutationPattern, RPT, 48);   //permutacja rozszerzająca RPT z 32 do 48 bitów
-        RPT = TabUtils.xor(RPT, subKey);                                        //xorowanie RPT z podkluczem
-        for (int j = 0; j < 8; j++) {
-            System.arraycopy(RPT, j*6, sixBits, 0, 6);
-            sBoxResult = sBox[(j * 64) + calculatePositionInSBox(sixBits)]; //Sboxy
-            System.arraycopy(TabUtils.byteToBits(sBoxResult), 4, afterSBox, j * 4, 4); //od 4 bo bajta przedstawiamy jako 8 bitów a potrzebujemy 4 najmniejszych
+        byte[] afterSBox = new byte[4];
+
+        RPT = TabUtils.permutate(expansionPermutationPattern, RPT);//permutacja rozszerzająca RPT z 32 do 48 bitów
+        RPT = TabUtils.xor(RPT, subKey);                                //xorowanie RPT z podkluczem
+        byte[] sixBitBlocks = TabUtils.makeBlocks(RPT, 6);
+        byte tmp = 0;
+
+        for (int i = 0; i < 8; i++) {
+            sixBits = sixBitBlocks[i];
+            sBoxResult = sBox[(i * 64) + calculatePositionInSBox(sixBits)]; //Sboxy
+            if(i % 2 == 0) {
+                tmp = sBoxResult;
+            } else {
+                afterSBox[(i)/2] = (byte) ((tmp * 16) + sBoxResult);
+            }
         }
-        afterSBox = TabUtils.permutate(patternPermutation, afterSBox, 32);
+        afterSBox = TabUtils.permutate(patternPermutation, afterSBox);
 
         RPT = TabUtils.xor(LPT, afterSBox);
         return RPT;
     }
 
-    private int calculatePositionInSBox(byte[] tab) {
-        byte[] row = { tab[0], tab[5] };
-        byte[] column = { tab[1], tab[2], tab[3], tab[4] };
-
-        return TabUtils.bitsToInt(row) * 16 + TabUtils.bitsToInt(column);
+    private int calculatePositionInSBox(byte number) {
+        byte row = (byte) (2 * TabUtils.getBit(number, 0) + TabUtils.getBit(number, 5));
+        byte column = (byte) (8 * TabUtils.getBit(number, 1) + 4 * TabUtils.getBit(number, 2) + 2 * TabUtils.getBit(number, 3) + TabUtils.getBit(number, 4));
+        return (row * 16) + column;
     }
 
     public String getCipherText() {
         StringBuilder cipherText = new StringBuilder();
         for (DataBlock dataBlock : cipherArr) {
-            cipherText.append(TabUtils.bitsToHex(dataBlock.getPrimaryBitBlock()));
+            cipherText.append(TabUtils.bytesToHex(dataBlock.getPrimaryByteBlock()));
 
         }
         return cipherText.toString();
@@ -212,9 +222,18 @@ public class Desx {
     public String getPlainText() {
         StringBuilder plainText = new StringBuilder();
         for (DataBlock dataBlock : cipherArr) {
-            plainText.append(TabUtils.bitsToString(dataBlock.getPrimaryBitBlock()));
+            plainText.append(TabUtils.bytesToString(dataBlock.getPrimaryByteBlock()));
         }
         return plainText.toString();
     }
+
+    public byte[] getBytes() {
+        byte[] Bytes = new byte[cipherArr.length * 8];
+        for (int i = 0; i < cipherArr.length; i++) {
+            System.arraycopy(cipherArr[i].getPrimaryByteBlock(), 0, Bytes, i * 8, 8);
+        }
+        return Bytes;
+    }
+
 
 }
