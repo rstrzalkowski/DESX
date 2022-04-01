@@ -1,6 +1,5 @@
 package com.example.model;
 
-
 public class Key {
 
     private final String strKey;

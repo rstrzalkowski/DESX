@@ -14,8 +14,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.regex.Pattern;
 
-import static java.nio.file.Files.readString;
-
 public class Controller {
     @FXML
     private TextField key1;
@@ -130,13 +128,6 @@ public class Controller {
             plaintext.setText(desx.getPlainText());
 
         }
-
-
-
-
-
-       // desx.decrypt(TabUtils.stringToBytes(ctStr));
-
         plaintext.setText(desx.getPlainText());
     }
 
@@ -230,9 +221,6 @@ public class Controller {
 
             fileName.setText(filePT.getName());
 
-
-
-
         }
     }
 
@@ -246,8 +234,8 @@ public class Controller {
         if (fileCT != null) {
             try {
                 allBytesCT = Files.readAllBytes(Path.of(fileCT.getAbsolutePath()));
-//                String text = TabUtils.bytesToHex(allBytesCT);
-//                ciphertext.setText(text);
+                String text = TabUtils.bytesToHex(allBytesCT);
+                ciphertext.setText(text);
             } catch (IOException e) {
                 Alert a = new Alert(Alert.AlertType.ERROR);
                 a.setHeaderText(null);
@@ -321,8 +309,11 @@ public class Controller {
 
     @FXML
     public void onSavePlainTextButtonClicked(ActionEvent event) {
-        if (allBytesPT == null) {
-            allBytesPT = TabUtils.stringToBytes(plaintext.getText());
+        byte[] allBytes;
+        if (windowRadio.isSelected()) {
+            allBytes = TabUtils.stringToBytes(plaintext.getText());
+        } else {
+            allBytes = allBytesPT;
         }
 
         FileChooser fileChooser = new FileChooser();
@@ -331,7 +322,7 @@ public class Controller {
         File selectedFile = fileChooser.showSaveDialog(savePlaintextButton.getScene().getWindow());
         if (selectedFile != null) {
             try {
-                Files.write(selectedFile.toPath(), allBytesPT);
+                Files.write(selectedFile.toPath(), allBytes);
             } catch (IOException e) {
                 Alert a = new Alert(Alert.AlertType.ERROR);
                 a.setHeaderText(null);
@@ -343,7 +334,12 @@ public class Controller {
 
     @FXML
     public void onSaveCipherTextButtonClicked(ActionEvent event) {
-        allBytesCT = TabUtils.hexStringToBytes(ciphertext.getText());
+        byte[] allBytes;
+        if(allBytesCT != null) {
+            allBytes = allBytesCT;
+        } else {
+            allBytes = TabUtils.hexStringToBytes(ciphertext.getText());
+        }
 
 
         FileChooser fileChooser = new FileChooser();
@@ -352,7 +348,7 @@ public class Controller {
         File selectedFile = fileChooser.showSaveDialog(saveCiphertextButton.getScene().getWindow());
         if (selectedFile != null) {
             try {
-                Files.write(selectedFile.toPath(), allBytesCT);
+                Files.write(selectedFile.toPath(), allBytes);
             } catch (IOException e) {
                 Alert a = new Alert(Alert.AlertType.ERROR);
                 a.setHeaderText(null);
@@ -361,8 +357,4 @@ public class Controller {
             }
         }
     }
-
-
-
-
 }
