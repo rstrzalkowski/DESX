@@ -1,7 +1,6 @@
 package com.example.model;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 
 public class TabUtils {
 
@@ -32,9 +31,8 @@ public class TabUtils {
 
     public static byte getBit(byte[] block, int index) {
         int bytePos = index / 8;
-        int bitPos = index % 8;
         byte value = block[bytePos];
-        return (byte) (value>>(8-(bitPos+1)) & 0x0001);
+        return getBit(value, index);
     }
 
     public static byte getBit(byte number, int index) {

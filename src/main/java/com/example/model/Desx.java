@@ -127,10 +127,10 @@ public class Desx {
 
             LPT = block.getLPT();
             RPT = block.getRPT();
-            Key key = new Key(key2.getStrKey()); //stan klucza się zmienia po każdym key.roundEncrypt() wiec tworzymy tymczasowy klucz
+            Key key = new Key(key2.getStrKey());                                          //stan klucza się zmienia po każdym key.roundEncrypt() wiec tworzymy tymczasowy klucz
 
             for (int i = 0; i < 16; i++) {
-                tmp = RPT;                                                                //zapamietanie RPT, by potem przypisać do LPT
+                tmp = RPT;                                                               //zapamietanie RPT, by potem przypisać do LPT
                 byte[] subKey = key.roundEncrypt(i, false);                     //generowanie 48 bitowego podklucza poprzez przesuwanie bitów i permutacje
                 RPT = subKeyOperation(subKey, RPT, LPT);
                 LPT = tmp;
@@ -159,10 +159,10 @@ public class Desx {
 
             LPT = block.getLPT();
             RPT = block.getRPT();
-            Key key = new Key(key2.getStrKey()); //stan klucza się zmienia po każdym key.roundEncrypt() wiec tworzymy tymczasowy klucz
+            Key key = new Key(key2.getStrKey());                                         //stan klucza się zmienia po każdym key.roundEncrypt() wiec tworzymy tymczasowy klucz
 
             for (int i = 16; i > 0; i--) {
-                tmp = RPT;                                                                //zapamietanie RPT, by potem przypisać do LPT
+                tmp = RPT;                                                               //zapamietanie RPT, by potem przypisać do LPT
                 byte[] subKey = key.roundEncrypt(i, true);                     //generowanie 48 bitowego podklucza poprzez przesuwanie bitów i permutacje
                 RPT = subKeyOperation(subKey, RPT, LPT);
                 LPT = tmp;
@@ -178,7 +178,6 @@ public class Desx {
     }
 
     private byte[] subKeyOperation(byte[] subKey, byte[] RPT, byte[] LPT) {
-        byte sixBits;
         byte sBoxResult;
         byte[] afterSBox = new byte[4];
 
@@ -188,8 +187,7 @@ public class Desx {
         byte tmp = 0;
 
         for (int i = 0; i < 8; i++) {
-            sixBits = sixBitBlocks[i];
-            sBoxResult = sBox[(i * 64) + calculatePositionInSBox(sixBits)]; //Sboxy
+            sBoxResult = sBox[(i * 64) + calculatePositionInSBox(sixBitBlocks[i])]; //Sboxy
             if(i % 2 == 0) {
                 tmp = sBoxResult;
             } else {

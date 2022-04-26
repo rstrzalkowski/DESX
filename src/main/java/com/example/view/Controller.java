@@ -12,6 +12,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Random;
 import java.util.regex.Pattern;
 
 public class Controller {
@@ -53,6 +54,7 @@ public class Controller {
     private Text cipherFileName;
 
     private final ToggleGroup group = new ToggleGroup();
+
     private File filePT = null;
     private File fileCT = null;
     private byte[] allBytesPT;
@@ -87,20 +89,31 @@ public class Controller {
 
     @FXML
     public void onGenerateButtonClick(ActionEvent actionEvent) {
-        key1.setText("0123456789ABCDEF");
-        key2.setText("1133557799BBDDFF");
-        key3.setText("0022446688AACCEE");
+        String HEX_ARRAY = "0123456789ABCDEF";
+
+        Random r = new Random();
+        StringBuilder s1 = new StringBuilder();
+        StringBuilder s2 = new StringBuilder();
+        StringBuilder s3 = new StringBuilder();
+        for (int i = 0; i < 16; i++) {
+            s1.append(HEX_ARRAY.charAt(Math.abs(r.nextInt() % 16)));
+            s2.append(HEX_ARRAY.charAt(Math.abs(r.nextInt() % 16)));
+            s3.append(HEX_ARRAY.charAt(Math.abs(r.nextInt() % 16)));
+        }
+        key1.setText(s1.toString());
+        key2.setText(s2.toString());
+        key3.setText(s3.toString());
     }
 
     private void encrypt(boolean fromWindow) {
         Desx desx = new Desx(key1.getText(), key2.getText(), key3.getText());
-        if(fromWindow) {
+        if (fromWindow) {
             String pt = plaintext.getText();
             byte[] allBytes = pt.getBytes(StandardCharsets.UTF_8);
-
             desx.encrypt(allBytes);
-
             ciphertext.setText(desx.getCipherText());
+            allBytesCT = desx.getBytes();
+
         } else {
             desx.encrypt(allBytesPT);
             allBytesCT = desx.getBytes();
@@ -112,7 +125,7 @@ public class Controller {
 
     private void decrypt(boolean fromWindow) {
         Desx desx = new Desx(key1.getText(), key2.getText(), key3.getText());
-        if(fromWindow) {
+        if (fromWindow) {
             String ctHex = ciphertext.getText();
             byte[] allBytes = TabUtils.hexStringToBytes(ctHex);
 
@@ -124,11 +137,9 @@ public class Controller {
 
             desx.decrypt(allBytesCT);
 
-            allBytesPT = desx.getBytes();
             plaintext.setText(desx.getPlainText());
-
+            allBytesPT = desx.getBytes();
         }
-        plaintext.setText(desx.getPlainText());
     }
 
     @FXML
@@ -206,7 +217,6 @@ public class Controller {
 
             try {
                 allBytesPT = Files.readAllBytes(Path.of(filePT.getAbsolutePath()));
-
 
                 String text = TabUtils.bytesToString(allBytesPT);
                 plaintext.setText(text);
@@ -310,7 +320,7 @@ public class Controller {
     @FXML
     public void onSavePlainTextButtonClicked(ActionEvent event) {
         byte[] allBytes;
-        if (windowRadio.isSelected()) {
+        if (allBytesPT == null) {
             allBytes = TabUtils.stringToBytes(plaintext.getText());
         } else {
             allBytes = allBytesPT;
@@ -334,13 +344,7 @@ public class Controller {
 
     @FXML
     public void onSaveCipherTextButtonClicked(ActionEvent event) {
-        byte[] allBytes;
-        if(allBytesCT != null) {
-            allBytes = allBytesCT;
-        } else {
-            allBytes = TabUtils.hexStringToBytes(ciphertext.getText());
-        }
-
+        byte[] allBytes = TabUtils.hexStringToBytes(ciphertext.getText());
 
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Zapisz szyfrogram do pliku");
