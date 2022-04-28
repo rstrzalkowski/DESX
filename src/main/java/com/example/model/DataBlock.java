@@ -4,7 +4,6 @@ public class DataBlock {
 
     private byte[] byteBlock;
 
-
     public DataBlock(byte[] block) {
         byteBlock = block.clone();
     }

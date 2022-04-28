@@ -30,18 +30,18 @@ public class TabUtils {
 
 
     public static byte getBit(byte[] block, int index) {
-        int bytePos = index / 8;
+        int bytePos = index >> 3;
         byte value = block[bytePos];
         return getBit(value, index);
     }
 
     public static byte getBit(byte number, int index) {
-        return (byte) (number >> (8 - ((index % 8) + 1)) & 0x0001);
+        return (byte) (number >> (8 - ((index & 7) + 1)) & 0x0001);
     }
 
     public static void setBit(byte[] block, int index, int val) {
-        int bytePos = index / 8;
-        int bitPos = index % 8;
+        int bytePos = index >> 3;
+        int bitPos = index & 7;
         byte oldByte = block[bytePos];
         oldByte = (byte) (((0xFF7F>>bitPos) & oldByte) & 0x00FF);
         byte newByte = (byte) ((val<<(8-(bitPos+1))) | oldByte);

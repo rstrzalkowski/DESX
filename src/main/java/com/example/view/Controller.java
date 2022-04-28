@@ -120,12 +120,13 @@ public class Controller {
             ciphertext.setText(desx.getCipherText());
 
         }
-
     }
+
+
 
     private void decrypt(boolean fromWindow) {
         Desx desx = new Desx(key1.getText(), key2.getText(), key3.getText());
-        if (fromWindow) {
+        if (fromWindow && (ciphertext.getLength() & 1) == 0) {
             String ctHex = ciphertext.getText();
             byte[] allBytes = TabUtils.hexStringToBytes(ctHex);
 
@@ -133,12 +134,18 @@ public class Controller {
 
             plaintext.setText(desx.getPlainText());
             allBytesPT = desx.getBytes();
-        } else {
+        } else if((ciphertext.getLength() & 1) == 0) {
 
             desx.decrypt(allBytesCT);
 
             plaintext.setText(desx.getPlainText());
             allBytesPT = desx.getBytes();
+        } else {
+            Alert a = new Alert(Alert.AlertType.ERROR);
+            a.setTitle("Error");
+            a.setHeaderText(null);
+            a.setContentText("Zly format szyfrogramu");
+            a.show();
         }
     }
 

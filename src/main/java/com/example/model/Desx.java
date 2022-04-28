@@ -142,7 +142,6 @@ public class Desx {
             cipherText = TabUtils.xor(key3.getByteBlock(), cipherText); //xorowanie końcowego bloku danych z trzecim kluczem
             cipherArr[counter++] = new DataBlock(cipherText);
         }
-
     }
 
     public void decrypt(byte[] allBytes) {
